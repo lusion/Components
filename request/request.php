@@ -26,7 +26,7 @@ class Request {
         } catch (Exception $e) {
           self::$country = 'US';
         }
-        setcookie('country', $country, 0, '/');
+        setcookie('country', self::$country, 0, '/');
       }
 
       if (!preg_match('/^[A-Z]{2}$/', self::$country)) {
