@@ -12,6 +12,26 @@ class Request {
     return ($_SERVER['REQUEST_METHOD'] == 'POST');
   }
 
+  static function getRemoteIP() {
+    foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'HTTP_X_FORWARDED') as $header) {
+      if ($values = ARR($_SERVER, $header)) {
+        foreach (explode(',', $values) as $ip) {
+          if (valid_ip($ip)) return $ip;
+        }
+      }
+    }
+
+    return ARR($_SERVER,'REMOTE_ADDR','0.0.0.0');
+  }
+
+  static function setupMixpanelDistinct() {
+    if (!$mixpanel_distinct = ARR($_COOKIE, 'mixpanel_distinct')) {
+      $mixpanel_distinct = uniqid(ip2long($_SERVER['REMOTE_ADDR']), True);
+    }
+    setcookie('mixpanel_distinct', $mixpanel_distinct, time()+60*60*24*30, '/', '.'.domain);
+    return $mixpanel_distinct;
+  }
+
   static function getCountry() {
     if (!self::$country) {
       if (isset($_GET['country'])) {
@@ -20,7 +40,7 @@ class Request {
       }elseif (isset($_COOKIE['country'])) {
         self::$country = $_COOKIE['country'];
       }else{
-        $remote = find_remote_ip();
+        $remote = self::getRemoteIP();
         try { 
           self::$country = geoip_country_code_by_name($remote);
         } catch (Exception $e) {
