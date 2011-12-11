@@ -24,9 +24,15 @@ class Request {
     return ARR($_SERVER,'REMOTE_ADDR','0.0.0.0');
   }
 
+  static function getURL() {
+    return (self::isSecure() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  }
+
   static function setupMixpanelDistinct() {
-    if (!$mixpanel_distinct = ARR($_COOKIE, 'mixpanel_distinct')) {
-      $mixpanel_distinct = uniqid(ip2long($_SERVER['REMOTE_ADDR']), True);
+    if (!$mixpanel_distinct = DEF('mixpanel_distinct')) {
+      if (!$mixpanel_distinct = ARR($_COOKIE, 'mixpanel_distinct')) {
+        $mixpanel_distinct = uniqid(ip2long($_SERVER['REMOTE_ADDR']), True);
+      }
     }
     setcookie('mixpanel_distinct', $mixpanel_distinct, time()+60*60*24*30, '/', '.'.domain);
     return $mixpanel_distinct;
