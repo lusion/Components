@@ -11,6 +11,10 @@ class Logger {
   }
 
   function log($message) {
-    file_put_contents($this->filename, $this->prefix.$message."\n", FILE_APPEND | LOCK_EX);
+    if ($this->filename == 'php://stdout') {
+      print $this->prefix.$message."\n";
+    }else{
+      file_put_contents($this->filename, $this->prefix.$message."\n", FILE_APPEND | LOCK_EX);
+    }
   }
 }
