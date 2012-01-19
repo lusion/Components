@@ -24,20 +24,5 @@ class Uri {
     }
     return $uri->getParts();
   }
-
-  static function interpretRequest($uri=NULL) {
-    if (!$uri) {
-      $b = strrchr($_SERVER['PHP_SELF'],'/');
-      $uri = trim(substr($_SERVER['REQUEST_URI'],(strlen($_SERVER['PHP_SELF'])-strlen($b)+1)));
-    }
-
-    $display = urldecode($uri);
-    $qpos = strpos($display,'?');
-    if ($qpos !== FALSE)
-      $display = substr($display,0,$qpos);
-    if (strlen($display) == 0) $display = 'index';
-
-    return new Uri($display);
-  }
 }
 

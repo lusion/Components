@@ -38,6 +38,20 @@ class Request {
     return $mixpanel_distinct;
   }
 
+  static function getUri() {
+    if (!$uri) {
+      $uri = trim(substr($_SERVER['REQUEST_URI'],1));
+    }
+
+    $display = urldecode($uri);
+    $qpos = strpos($display,'?');
+    if ($qpos !== FALSE)
+      $display = substr($display,0,$qpos);
+    if (strlen($display) == 0) $display = 'index';
+
+    return new Uri($display);
+  }
+
   static function getCountry() {
     if (!self::$country) {
       if (isset($_GET['country'])) {
