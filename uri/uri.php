@@ -11,13 +11,26 @@ class Uri {
     $this->parts = $uri;
   }
 
+  /***
+   * Get the uri again
+   **/
   function get() {
     return '/'.implode('/', $this->parts);
+  }
+
+  /***
+   * Get parts of the Uri
+   **/
+  function getPart($i) {
+    return ARR($this->parts, $i);
   }
   function getParts() {
     return $this->parts;
   }
 
+  /***
+   * Split a given uri into parts
+   **/
   static function split($uri) {
     if (!$uri instanceof Uri) {
       $uri = new Uri($uri);
