@@ -39,9 +39,7 @@ class Request {
   }
 
   static function getUri() {
-    if (!$uri) {
-      $uri = trim(substr($_SERVER['REQUEST_URI'],1));
-    }
+    $uri = trim(substr($_SERVER['REQUEST_URI'],1));
 
     $display = urldecode($uri);
     $qpos = strpos($display,'?');
