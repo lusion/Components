@@ -1,6 +1,6 @@
 <?php
 
-class Uri {
+class Uri implements Countable {
   private $parts;
 
   function __construct($uri) {
@@ -9,6 +9,13 @@ class Uri {
       $uri = explode('/', $uri);
     }
     $this->parts = $uri;
+  }
+
+  /***
+   * Count the number of parts
+   **/
+  function count() {
+    return count($this->parts);
   }
 
   /***
