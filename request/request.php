@@ -1,78 +1,78 @@
 <?php
 
 class Request {
-  static private $country = NULL;
+  var $uri,
+      $port,
+      $method,
+      $ip,
+      $country,
+      $get,
+      $post;
 
-  static function isSecure() {
-    if (isset($_SERVER['SERVER_PORT']) && $_SERVER["SERVER_PORT"]==443) {
-      return True;
-    }else return False;
-  }
-  static function isPost() {
-    return ($_SERVER['REQUEST_METHOD'] == 'POST');
-  }
-
-  static function getRemoteIP() {
-    foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'HTTP_X_FORWARDED') as $header) {
-      if ($values = ARR($_SERVER, $header)) {
-        foreach (explode(',', $values) as $ip) {
-          if (valid_ip($ip)) return $ip;
-        }
-      }
+  function __construct($options) {
+    foreach (array('uri', 'ip', 'port', 'method', 'country', 'get', 'post') as $param) {
+      $this->$param = ARR($options, $param);
     }
 
-    return ARR($_SERVER,'REMOTE_ADDR','0.0.0.0');
-  }
-
-  static function getURL() {
-    return (self::isSecure() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-  }
-
-  static function setupMixpanelDistinct() {
-    if (!$mixpanel_distinct = DEF('mixpanel_distinct')) {
-      if (!$mixpanel_distinct = ARR($_COOKIE, 'mixpanel_distinct')) {
-        $mixpanel_distinct = uniqid(ip2long($_SERVER['REMOTE_ADDR']), True);
-      }
+    // Trim additional params off the uri
+    if (($pos = strpos($this->uri,'?')) !== False) {
+      $this->uri = substr($this->uri, 0, $pos);
     }
-    setcookie('mixpanel_distinct', $mixpanel_distinct, time()+60*60*24*30, '/', '.'.domain);
-    return $mixpanel_distinct;
   }
 
-  static function getUri() {
-    $uri = trim(substr($_SERVER['REQUEST_URI'],1));
+  private static $currentRequest = null;
+  static function interpretCurrent() {
+    if (!$currentRequest) {
+      $currentRequest = new Request(array(
+        'uri' => $_SERVER['REQUEST_URI'],
+        'host' => ARR($_SERVER, 'HTTP_HOST'),
+        'port' => ARR($_SERVER, 'SERVER_PORT'),
+        'method' => ARR($_SERVER, 'REQUEST_METHOD'),
+        'ip' => find_remote_ip(),
 
-    $display = urldecode($uri);
-    $qpos = strpos($display,'?');
-    if ($qpos !== FALSE)
-      $display = substr($display,0,$qpos);
-    if (strlen($display) == 0) $display = 'index';
+      ));
+    }
+      
 
-    return new Uri($display);
+
   }
 
-  static function getCountry() {
-    if (!self::$country) {
-      if (isset($_GET['country'])) {
-        self::$country = $_GET['country'];
-        setcookie('country', self::$country, 0, '/');
-      }elseif (isset($_COOKIE['country'])) {
-        self::$country = $_COOKIE['country'];
-      }else{
-        $remote = self::getRemoteIP();
-        try { 
-          self::$country = geoip_country_code_by_name($remote);
-        } catch (Exception $e) {
-          self::$country = 'US';
-        }
-        setcookie('country', self::$country, 0, '/');
-      }
+  function isSecure() {
+    return $this->port === 443;
+  }
 
-      if (!preg_match('/^[A-Z]{2}$/', self::$country)) {
+  function isPost() {
+    return $this->method === 'POST';
+  }
+
+
+  function getURL() {
+    return ($this->isSecure() ? 'https' : 'http') . '://' . $this->host . $this->uri;
+  }
+
+  function getUri() {
+    return new Uri(substr($this->uri, 1) ?: 'index');
+  }
+
+  function getCountry() {
+    if (!$this->country) {
+    }elseif (isset($_GET['country'])) {
+      $this->country = $_GET['country'];
+      setcookie('country', $this->country, 0, '/');
+    }elseif (isset($this->cookie['country'])) {
+      self::$country = $this->cookie['country'];
+    }elseif ($this->ip) {
+      try { 
+        self::$country = geoip_country_code_by_name($this->ip);
+      } catch (Exception $e) {
         self::$country = 'US';
       }
+      setcookie('country', $this->country, 0, '/');
     }
-
-    return self::$country;
+    if (!preg_match('/^[A-Z]{2}$/', $this->country)) {
+      $this->country = 'US';
+    }
+    return $this->country;
   }
 
   static function permanentRedirect($url) {
