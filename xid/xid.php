@@ -97,8 +97,8 @@ class Xid {
   public static function test($candidate) {
     // Allow standard numeric id or base64:base64 style
     if ($candidate && 
-        (ctype_digit($candidate) || // plain integer candidate
-        (is_string($candidate) && preg_match('/^([A-Za-z0-9-_]+:[A-Za-z0-9-_]+)$/S', $candidate))))
+        (is_int($candidate) || // plain integer candidate
+        (is_string($candidate) && preg_match('/^([0-9]+|[A-Za-z0-9-_]+:[A-Za-z0-9-_]+)$/S', $candidate))))
     {
       return $candidate;
     }
