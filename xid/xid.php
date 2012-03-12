@@ -84,7 +84,7 @@ class Xid {
    */
   public static function decode($xid) {
     // Allow standard numeric ID for now
-    if (is_numeric($xid)) return array(0, intval($xid));
+    if (ctype_digit($xid)) return array(0, intval($xid));
     list($reseller_portion, $object_portion) = explode(':', $xid);
     return array(self::base64_decode_number($reseller_portion),
       self::base64_decode_number($object_portion));
@@ -97,8 +97,8 @@ class Xid {
   public static function test($candidate) {
     // Allow standard numeric id or base64:base64 style
     if ($candidate && 
-        (is_int($candidate) || // plain integer candidate
-        (is_string($candidate) && preg_match('/^([0-9]+|[A-Za-z0-9-_]+:[A-Za-z0-9-_]+)$/S', $candidate))))
+        (ctype_digit($candidate) || // plain integer candidate
+        (is_string($candidate) && preg_match('/^([A-Za-z0-9-_]+:[A-Za-z0-9-_]+)$/S', $candidate))))
     {
       return $candidate;
     }
