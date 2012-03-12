@@ -84,7 +84,7 @@ class Xid {
    */
   public static function decode($xid) {
     // Allow standard numeric ID for now
-    if (ctype_digit($xid)) return array(0, intval($xid));
+    if (is_number($xid)) return array(0, intval($xid));
     list($reseller_portion, $object_portion) = explode(':', $xid);
     return array(self::base64_decode_number($reseller_portion),
       self::base64_decode_number($object_portion));
