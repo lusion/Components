@@ -70,23 +70,23 @@ class Xid {
       "A", STR_PAD_LEFT);
   }
   /**
-   * Create a distributed xid from given reseller id and object id.
+   * Create a distributed xid from given account id and object id.
    * Table is implicit in class name used for load().
    * @return string 10-symbol padded Base 64 value containing both id's.
    */
-  public static function encode($reseller_id, $object_id) {
-    return self::base64_encode_number($reseller_id).':'.
+  public static function encode($account_id, $object_id) {
+    return self::base64_encode_number($account_id).':'.
       self::base64_encode_number($object_id);
   }
 
   /**
-   * @return array($reseller_id, $object_id)
+   * @return array($account_id, $object_id)
    */
   public static function decode($xid) {
     // Allow standard numeric ID for now
     if (is_number($xid)) return array(0, intval($xid));
-    list($reseller_portion, $object_portion) = explode(':', $xid);
-    return array(self::base64_decode_number($reseller_portion),
+    list($account_portion, $object_portion) = explode(':', $xid);
+    return array(self::base64_decode_number($account_portion),
       self::base64_decode_number($object_portion));
   }
 
